@@ -88,3 +88,11 @@ body {
 .key .shift {
     display: none;
 }
+
+.value {
+    display: none;
+}
+
+.open {
+    display: block;
+}

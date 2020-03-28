@@ -25,46 +25,52 @@ class Keyboard {
     this.main = null;
     this.rows = [];
     this.keys = [];
-    this.currentLang = '';
     this.caps = false;
     this.langs = [];
+    this.currentLang = 0;
   }
 
-  init(layout) {
-    this.main = this.createBaseLangLayout(layout);
+  init(layouts) {
+    this.main = this.createBaseLangLayout(layouts[0]);
+    this.rows = this.main.querySelectorAll('.keyboard__row');
+    this.keys = this.main.querySelectorAll('.key');
+    this.addLeftLangs(layouts.slice(1, layouts.length));
+    this.switchLang();
     document.querySelector('.wrapper').append(this.main);
+  }
+
+  addLeftLangs(layouts) {
+    layouts.forEach((layout) => {
+      this.addLang(layout);
+    });
   }
 
   createBaseLangLayout(baseLayout) {
     const keyboard = document.createElement('div');
     keyboard.classList.add('keyboard');
-    this.currentLang = baseLayout.lang;
+    this.langs.push(baseLayout.lang);
     baseLayout.keysLayout.forEach((row) => {
       keyboard.append(this.createRow(row));
     });
     return keyboard;
   }
 
-  // addAdditionalLang() {
-  //   for (let i = 1; i < this.langs.length; i++) {
-  //     this.addLang(this.langs[i]);
-  //   }
-  // }
-
-  // addLang(langLayout) {
-  //   this.langs.push(langLayout.lang);
-  //   langLayout.keysLayout.forEach((row, i) => {
-  //     row.forEach((key, j) => {
-  //       if (!(key.length === 1 && key[0].length !== 1)) {
-  //         if (key.length === 1 && key[0].length === 1) {
-  //           this.addOutputtedKeyInner(this.main, 'letter', key[0].toLowerCase(), key[0].toUpperCase());
-  //         } else {
-  //           this.addOutputtedKeyInner(keyElement, 'sign', key[0], key[1]);
-  //         }
-  //       }
-  //     })
-  //   });
-  // }
+  addLang(langLayout) {
+    this.langs.push(langLayout.lang);
+    this.currentLang += 1;
+    langLayout.keysLayout.forEach((row, i) => {
+      const keyboardKeys = this.rows[i].querySelectorAll('.key');
+      row.forEach((key, j) => {
+        if (!(key.length === 1 && key[0].length !== 1)) {
+          if (key.length === 1 && key[0].length === 1) {
+            this.addOutputtedKeyInner(keyboardKeys[j], 'letter', key[0].toLowerCase(), key[0].toUpperCase());
+          } else {
+            this.addOutputtedKeyInner(keyboardKeys[j], 'sign', key[0], key[1]);
+          }
+        }
+      });
+    });
+  }
 
   createRow(row) {
     const keyboardRow = document.createElement('div');
@@ -92,7 +98,7 @@ class Keyboard {
 
   addOutputtedKeyInner(keyElement, type, normal, shift) {
     const lang = document.createElement('div');
-    lang.classList.add(this.currentLang);
+    lang.classList.add(this.langs[this.currentLang], 'value');
     lang.setAttribute('key-type', type);
     lang.append(this.addState('normal', normal), this.addState('shift', shift));
     keyElement.append(lang);
@@ -124,9 +130,20 @@ class Keyboard {
       default:
     }
   }
+
+  switchLang() {
+    document.querySelectorAll(`.${this.langs[this.currentLang]}`).forEach((el) => {
+      el.classList.remove('open');
+    });
+    this.currentLang = (this.currentLang + 1) % this.langs.length;
+    this.main.querySelectorAll(`.${this.langs[this.currentLang]}`).forEach((el) => {
+      el.classList.add('open');
+    });
+    console.log(this.langs[this.currentLang]);
+  }
 }
 
 window.addEventListener('DOMContentLoaded', () => {
   const keyboard = new Keyboard();
-  keyboard.init(keyboardLayoutRus);
+  keyboard.init([keyboardLayoutRus, keyboardLayoutEng]);
 });
