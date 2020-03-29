@@ -5,7 +5,7 @@ const keyboardLayoutRus = {
     [['tab'], ['й'], ['ц'], ['у'], ['к'], ['е'], ['н'], ['г'], ['ш'], ['щ'], ['з'], ['х'], ['ъ'], ['\\', '/'], ['del']],
     [['caps lock'], ['ф'], ['ы'], ['в'], ['а'], ['п'], ['р'], ['о'], ['л'], ['д'], ['ж'], ['э'], ['enter']],
     [['shift'], ['я'], ['ч'], ['с'], ['м'], ['и'], ['т'], ['ь'], ['б'], ['ю'], ['.', ','], ['shift']],
-    [['ctrl'], ['win'], ['alt'], ['space'], ['alt'], ['ctrl'], ['left'], ['up'], ['right']],
+    [['ctrl'], ['alt'], ['space'], ['alt'], ['ctrl'], ['left'], ['up'], ['right']],
   ],
 };
 
@@ -16,9 +16,17 @@ const keyboardLayoutEng = {
     [['tab'], ['q'], ['w'], ['e'], ['r'], ['t'], ['y'], ['u'], ['i'], ['o'], ['p'], ['[', '{'], [']', '}'], ['\\', '|'], ['del']],
     [['caps lock'], ['a'], ['s'], ['d'], ['f'], ['g'], ['h'], ['j'], ['k'], ['l'], [';', ':'], ['\'', '"'], ['enter']],
     [['shift'], ['z'], ['x'], ['c'], ['v'], ['b'], ['n'], ['m'], [',', '<'], ['.', '>'], ['/', '?'], ['shift']],
-    [['ctrl'], ['win'], ['alt'], ['space'], ['alt'], ['ctrl'], ['left'], ['up'], ['right']],
+    [['ctrl'], ['alt'], ['space'], ['alt'], ['ctrl'], ['left'], ['up'], ['right']],
   ],
 };
+
+const eventKeysLayout = [
+  ['Backqoute', 'Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9', 'Digit0', 'Minus', 'Equal', 'Backspace'],
+  ['Tab', 'KeyQ', 'KeyW', 'KeyE', 'KeyR', 'KeyT', 'KeyY', 'KeyU', 'KeyI', 'KeyO', 'KeyP', 'BracketLeft', 'BracketRight', 'Backslash'],
+  ['CapsLock', 'KeyA', 'KeyS', 'KeyD', 'KeyF', 'KeyG', 'KeyH', 'KeyJ', 'KeyK', 'KeyL', 'Semicolon', 'Quote', 'Enter'],
+  ['ShiftLeft', 'KeyZ', 'KeyX', 'KeyC', 'KeyV', 'KeyB', 'KeyN', 'KeyM', 'Comma', 'Period', 'Slash', 'ShiftRight'],
+  ['ControlLeft', 'MetaLeft', 'AltLeft', 'Space', 'AltRight', 'ControlRight', 'ArrowLeft', 'ArrowDown', 'ArrowRight'],
+];
 
 class Keyboard {
   constructor() {
@@ -37,22 +45,40 @@ class Keyboard {
     this.addLeftLangs(layouts.slice(1, layouts.length));
     this.switchLang();
     document.querySelector('.wrapper').append(this.main);
+    this.addEvents();
   }
 
-  addLeftLangs(layouts) {
-    layouts.forEach((layout) => {
-      this.addLang(layout);
-    });
+  addEvents() {
+    let shiftPressed = false;
+    document.addEventListener('keydown', (event) => {
+      if (shiftPressed) return;
+      if (event.code === 'ShiftLeft' || event.code === 'ShiftLeft') {
+        shiftPressed = true;
+      }
+      this.keydownHandler(event.code);
+    }, false);
+    document.addEventListener('keyup', (event) => {
+      if (event.code === 'ShiftLeft' || event.code === 'ShiftLeft') {
+        shiftPressed = false;
+      }
+      this.keyupHandler(event.code);
+    }, false);
   }
 
   createBaseLangLayout(baseLayout) {
     const keyboard = document.createElement('div');
     keyboard.classList.add('keyboard');
     this.langs.push(baseLayout.lang);
-    baseLayout.keysLayout.forEach((row) => {
-      keyboard.append(this.createRow(row));
+    baseLayout.keysLayout.forEach((row, i) => {
+      keyboard.append(this.createRow(row, eventKeysLayout[i]));
     });
     return keyboard;
+  }
+
+  addLeftLangs(layouts) {
+    layouts.forEach((layout) => {
+      this.addLang(layout);
+    });
   }
 
   addLang(langLayout) {
@@ -72,19 +98,19 @@ class Keyboard {
     });
   }
 
-  createRow(row) {
+  createRow(row, eventKeyRow) {
     const keyboardRow = document.createElement('div');
     keyboardRow.classList.add('keyboard__row');
-    row.forEach((key) => {
-      keyboardRow.append(this.createKey(key));
+    row.forEach((key, i) => {
+      keyboardRow.append(this.createKey(key, eventKeyRow[i]));
     });
     return keyboardRow;
   }
 
   // eslint-disable-next-line class-methods-use-this
-  createKey(key) {
+  createKey(key, eventKey) {
     const keyElement = document.createElement('div');
-    keyElement.classList.add('key');
+    keyElement.classList.add('key', eventKey);
     if (key.length === 1 && key[0].length === 1) {
       this.addOutputtedKeyInner(keyElement, 'letter', key[0].toLowerCase(), key[0].toUpperCase());
     } else if (key.length === 2) {
@@ -98,16 +124,16 @@ class Keyboard {
 
   addOutputtedKeyInner(keyElement, type, normal, shift) {
     const lang = document.createElement('div');
-    lang.classList.add(this.langs[this.currentLang], 'value');
+    lang.classList.add(this.langs[this.currentLang]);
     lang.setAttribute('key-type', type);
-    lang.append(this.addState('normal', normal), this.addState('shift', shift));
+    lang.append(this.addState(['normal', 'open'], normal), this.addState(['shift'], shift));
     keyElement.append(lang);
   }
 
   // eslint-disable-next-line class-methods-use-this
-  addState(stateType, stateValue) {
+  addState(states, stateValue) {
     const state = document.createElement('div');
-    state.classList.add(stateType);
+    state.classList.add(...states);
     state.textContent = stateValue;
     return state;
   }
@@ -140,10 +166,96 @@ class Keyboard {
       el.classList.add('open');
     });
     console.log(this.langs[this.currentLang]);
+    this.switchCase();
+  }
+
+  switchCase() {
+    if (this.caps) {
+      this.main.querySelectorAll('.key .open[key-type="letter"]').forEach((key) => {
+        key.querySelector('.normal').classList.remove('open');
+        key.querySelector('.shift').classList.add('open');
+      });
+    } else {
+      this.main.querySelectorAll('.key .open[key-type="letter"]').forEach((key) => {
+        key.querySelector('.shift').classList.remove('open');
+        key.querySelector('.normal').classList.add('open');
+      });
+    }
+  }
+
+  switchShift() {
+    this.main.querySelectorAll('.key > .open').forEach((key) => {
+      key.querySelector('.normal').classList.toggle('open');
+      key.querySelector('.shift').classList.toggle('open');
+    });
+  }
+
+  clickHandler(key) {
+    if (!key.hasAttribute('key-type', 'function')) {
+      const keyValue = key.querySelector('.open .open').textContent;
+      document.querySelector('.textarea').value += keyValue.toString();
+    } else {
+      switch (key.classList[1]) {
+        case 'ShiftRight':
+        case 'ShiftLeft':
+          this.shiftHandler();
+          break;
+        case 'CapsLock':
+          this.caps = !this.caps;
+          this.switchCase();
+          break;
+        default:
+      }
+    }
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  keyIsHandled(keyCode) {
+    return eventKeysLayout.some((row) => row.some((layoutCode) => layoutCode === keyCode));
+  }
+
+  keydownHandler(keyCode) {
+    if (this.keyIsHandled(keyCode)) {
+      const keyboardKey = this.main.querySelector(`.${keyCode}`);
+      keyboardKey.classList.add('active');
+      switch (keyCode) {
+        case 'CapsLock':
+          this.caps = !this.caps;
+          this.switchCase();
+          break;
+        case 'ShiftLeft':
+        case 'ShiftRight':
+          this.switchShift();
+          break;
+        default:
+          this.inputHandler(keyboardKey);
+      }
+    }
+  }
+
+  keyupHandler(keyCode) {
+    if (this.keyIsHandled(keyCode)) {
+      const keyboardKey = this.main.querySelector(`.${keyCode}`);
+      keyboardKey.classList.remove('active');
+    }
+    if (keyCode === 'ShiftLeft' || keyCode === 'ShiftRight') {
+      this.switchShift();
+    }
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  inputHandler(key) {
+    const keyValue = key.querySelector('.open .open').textContent;
+    document.querySelector('.textarea').value += keyValue.toString();
   }
 }
 
 window.addEventListener('DOMContentLoaded', () => {
   const keyboard = new Keyboard();
   keyboard.init([keyboardLayoutRus, keyboardLayoutEng]);
+  keyboard.main.addEventListener('mousedown', (event) => {
+    if (event.target.classList.contains('key')) {
+      keyboard.clickHandler(event.target);
+    }
+  });
 });

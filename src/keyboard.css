@@ -83,16 +83,24 @@ body {
 
 .key:active {
     background-color: rgba(226, 98, 66, 0.404);
+    border-radius: 30%;
+    transition: all 0.1s;
 }
 
-.key .shift {
-    display: none;
-}
-
-.value {
-    display: none;
+.key.active {
+    background-color: rgba(231, 61, 19);
+    border-radius: 30%;
+    transition: all 0.1s;
 }
 
 .open {
+    display: block;
+}
+
+[key-type="letter"], [key-type="sign"], .normal, .shift {
+    display: none;
+}
+
+[key-type="letter"].open, [key-type="sign"].open, .normal.open, .shift.open {
     display: block;
 }
