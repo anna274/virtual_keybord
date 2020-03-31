@@ -77,8 +77,8 @@ body {
 
 }
 
-.key_active::after {
-    background-color: rgb(91, 91, 228);
+.key:active::after {
+    background-color: rgb(13, 226, 42);
 }
 
 .key:active {
