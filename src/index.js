@@ -22,7 +22,7 @@ const keyboardLayoutEng = {
 
 const eventKeysLayout = [
   ['Backqoute', 'Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9', 'Digit0', 'Minus', 'Equal', 'Backspace'],
-  ['Tab', 'KeyQ', 'KeyW', 'KeyE', 'KeyR', 'KeyT', 'KeyY', 'KeyU', 'KeyI', 'KeyO', 'KeyP', 'BracketLeft', 'BracketRight', 'Backslash'],
+  ['Tab', 'KeyQ', 'KeyW', 'KeyE', 'KeyR', 'KeyT', 'KeyY', 'KeyU', 'KeyI', 'KeyO', 'KeyP', 'BracketLeft', 'BracketRight', 'Backslash', 'Delete'],
   ['CapsLock', 'KeyA', 'KeyS', 'KeyD', 'KeyF', 'KeyG', 'KeyH', 'KeyJ', 'KeyK', 'KeyL', 'Semicolon', 'Quote', 'Enter'],
   ['ShiftLeft', 'KeyZ', 'KeyX', 'KeyC', 'KeyV', 'KeyB', 'KeyN', 'KeyM', 'Comma', 'Period', 'Slash', 'ShiftRight'],
   ['ControlLeft', 'MetaLeft', 'AltLeft', 'Space', 'AltRight', 'ControlRight', 'ArrowLeft', 'ArrowDown', 'ArrowRight'],
@@ -38,9 +38,10 @@ class Keyboard {
     this.currentLang = 0;
     this.shift = false;
     this.alt = false;
+    this.textarea = null;
   }
 
-  init(layouts) {
+  init(layouts, textarea) {
     this.main = this.createBaseLangLayout(layouts[0]);
     this.rows = this.main.querySelectorAll('.keyboard__row');
     this.keys = this.main.querySelectorAll('.key');
@@ -48,6 +49,7 @@ class Keyboard {
     this.switchLang();
     this.switchCase();
     document.querySelector('.wrapper').append(this.main);
+    this.textarea = textarea;
     this.addEvents();
   }
 
@@ -178,6 +180,7 @@ class Keyboard {
   }
 
   switchLang() {
+    this.switchShift();
     document.querySelectorAll(`.${this.langs[this.currentLang]}`).forEach((el) => {
       el.classList.remove('open');
     });
@@ -185,6 +188,8 @@ class Keyboard {
     this.main.querySelectorAll(`.${this.langs[this.currentLang]}`).forEach((el) => {
       el.classList.add('open');
     });
+    this.switchCase();
+    this.switchShift();
   }
 
   switchCase() {
@@ -202,13 +207,19 @@ class Keyboard {
   }
 
   switchShift() {
+    const letters = this.main.querySelectorAll('.key > .open[key-type="letter"]');
+    const signs = this.main.querySelectorAll('.key > .open[key-type="sign"]');
+    letters.forEach((key) => {
+      key.querySelector('.normal').classList.toggle('open');
+      key.querySelector('.shift').classList.toggle('open');
+    });
     if (this.shift) {
-      this.main.querySelectorAll('.key > .open').forEach((key) => {
+      signs.forEach((key) => {
         key.querySelector('.normal').classList.remove('open');
         key.querySelector('.shift').classList.add('open');
       });
     } else {
-      this.main.querySelectorAll('.key > .open').forEach((key) => {
+      signs.forEach((key) => {
         key.querySelector('.normal').classList.add('open');
         key.querySelector('.shift').classList.remove('open');
       });
@@ -254,10 +265,10 @@ class Keyboard {
         break;
       case 'ShiftLeft':
       case 'ShiftRight':
+        this.switchShift();
         if (this.alt) {
           this.switchLang();
         }
-        this.switchShift();
         break;
       case 'AltLeft':
       case 'AltRight':
@@ -265,6 +276,11 @@ class Keyboard {
           this.switchLang();
         }
         break;
+      case 'Backspace': {
+        const textareaContent = this.textarea.value;
+        this.textarea.value = textareaContent.toString().slice(0, textareaContent.length - 1);
+        break;
+      }
       default:
     }
   }
@@ -282,11 +298,11 @@ class Keyboard {
   // eslint-disable-next-line class-methods-use-this
   handleInput(key) {
     const keyValue = key.querySelector('.open .open').textContent;
-    document.querySelector('.textarea').value += keyValue.toString();
+    this.textarea.value += keyValue.toString();
   }
 }
 
 window.addEventListener('DOMContentLoaded', () => {
   const keyboard = new Keyboard();
-  keyboard.init([keyboardLayoutRus, keyboardLayoutEng]);
+  keyboard.init([keyboardLayoutRus, keyboardLayoutEng], document.querySelector('.textarea'));
 });
