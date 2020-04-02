@@ -5,7 +5,7 @@ const keyboardLayoutRus = {
     [['tab'], ['й'], ['ц'], ['у'], ['к'], ['е'], ['н'], ['г'], ['ш'], ['щ'], ['з'], ['х'], ['ъ'], ['\\', '/'], ['del']],
     [['caps lock'], ['ф'], ['ы'], ['в'], ['а'], ['п'], ['р'], ['о'], ['л'], ['д'], ['ж'], ['э'], ['enter']],
     [['shift'], ['я'], ['ч'], ['с'], ['м'], ['и'], ['т'], ['ь'], ['б'], ['ю'], ['.', ','], ['up'], ['shift']],
-    [['ctrl'], ['win'], ['alt'], ['space'], ['alt'], ['ctrl'], ['left'], ['down'], ['right']],
+    [['ctrl'], ['win'], ['alt'], ['space'], ['alt'], ['left'], ['down'], ['right'], ['ctrl']],
   ],
 };
 
@@ -16,7 +16,7 @@ const keyboardLayoutEng = {
     [['tab'], ['q'], ['w'], ['e'], ['r'], ['t'], ['y'], ['u'], ['i'], ['o'], ['p'], ['[', '{'], [']', '}'], ['\\', '|'], ['del']],
     [['caps lock'], ['a'], ['s'], ['d'], ['f'], ['g'], ['h'], ['j'], ['k'], ['l'], [';', ':'], ['\'', '"'], ['enter']],
     [['shift'], ['z'], ['x'], ['c'], ['v'], ['b'], ['n'], ['m'], [',', '<'], ['.', '>'], ['/', '?'], ['up'], ['shift']],
-    [['ctrl'], ['win'], ['alt'], ['space'], ['alt'], ['ctrl'], ['left'], ['down'], ['right']],
+    [['ctrl'], ['win'], ['alt'], ['space'], ['alt'], ['left'], ['down'], ['right'], ['ctrl']],
   ],
 };
 
@@ -25,7 +25,7 @@ const eventKeysLayout = [
   ['Tab', 'KeyQ', 'KeyW', 'KeyE', 'KeyR', 'KeyT', 'KeyY', 'KeyU', 'KeyI', 'KeyO', 'KeyP', 'BracketLeft', 'BracketRight', 'Backslash', 'Delete'],
   ['CapsLock', 'KeyA', 'KeyS', 'KeyD', 'KeyF', 'KeyG', 'KeyH', 'KeyJ', 'KeyK', 'KeyL', 'Semicolon', 'Quote', 'Enter'],
   ['ShiftLeft', 'KeyZ', 'KeyX', 'KeyC', 'KeyV', 'KeyB', 'KeyN', 'KeyM', 'Comma', 'Period', 'Slash', 'ArrowUp', 'ShiftRight'],
-  ['ControlLeft', 'MetaLeft', 'AltLeft', 'Space', 'AltRight', 'ControlRight', 'ArrowLeft', 'ArrowDown', 'ArrowRight'],
+  ['ControlLeft', 'MetaLeft', 'AltLeft', 'Space', 'AltRight', 'ArrowLeft', 'ArrowDown', 'ArrowRight', 'ControlRight'],
 ];
 
 class Keyboard {
@@ -175,7 +175,19 @@ class Keyboard {
         break;
       case 'space':
         keyElement.classList.add('key_4-wide');
+        keyElement.textContent = '';
         break;
+      case 'up':
+      case 'down':
+      case 'left':
+      case 'right': {
+        const img = document.createElement('img');
+        img.classList.add('key__ico');
+        img.setAttribute('src', `./src/assets/img/${value}.png`);
+        keyElement.textContent = '';
+        keyElement.append(img);
+        break;
+      }
       default:
     }
   }
@@ -261,6 +273,7 @@ class Keyboard {
   handleFunction(keyCode) {
     switch (keyCode) {
       case 'CapsLock':
+        document.querySelector('.key_activatable').classList.toggle('on');
         this.caps = !this.caps;
         this.switchCase();
         break;
