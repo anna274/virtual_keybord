@@ -21,7 +21,7 @@ const keyboardLayoutEng = {
 };
 
 const eventKeysLayout = [
-  ['Backqoute', 'Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9', 'Digit0', 'Minus', 'Equal', 'Backspace'],
+  ['Backquote', 'Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9', 'Digit0', 'Minus', 'Equal', 'Backspace'],
   ['Tab', 'KeyQ', 'KeyW', 'KeyE', 'KeyR', 'KeyT', 'KeyY', 'KeyU', 'KeyI', 'KeyO', 'KeyP', 'BracketLeft', 'BracketRight', 'Backslash', 'Delete'],
   ['CapsLock', 'KeyA', 'KeyS', 'KeyD', 'KeyF', 'KeyG', 'KeyH', 'KeyJ', 'KeyK', 'KeyL', 'Semicolon', 'Quote', 'Enter'],
   ['ShiftLeft', 'KeyZ', 'KeyX', 'KeyC', 'KeyV', 'KeyB', 'KeyN', 'KeyM', 'Comma', 'Period', 'Slash', 'ArrowUp', 'ShiftRight'],
@@ -161,21 +161,22 @@ class Keyboard {
 
   // eslint-disable-next-line class-methods-use-this
   addFunctionKeyInner(keyElement, value) {
-    // eslint-disable-next-line no-param-reassign
-    keyElement.textContent = value;
     keyElement.setAttribute('key-type', 'function');
     switch (value) {
       case 'caps lock':
         keyElement.classList.add('key_2-wide', 'key_activatable');
+        // eslint-disable-next-line no-param-reassign
+        keyElement.textContent = value;
         break;
       case 'shift':
       case 'backspace':
       case 'enter':
         keyElement.classList.add('key_2-wide');
+        // eslint-disable-next-line no-param-reassign
+        keyElement.textContent = value;
         break;
       case 'space':
         keyElement.classList.add('key_4-wide');
-        keyElement.textContent = '';
         break;
       case 'up':
       case 'down':
@@ -184,11 +185,12 @@ class Keyboard {
         const img = document.createElement('img');
         img.classList.add('key__ico');
         img.setAttribute('src', `./src/assets/img/${value}.png`);
-        keyElement.textContent = '';
         keyElement.append(img);
         break;
       }
       default:
+        // eslint-disable-next-line no-param-reassign
+        keyElement.textContent = value;
     }
   }
 
